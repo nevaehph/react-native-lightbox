@@ -64,6 +64,7 @@ export default class Lightbox extends Component {
     didOpen: this.props.didOpen,
     willClose: this.props.willClose,
     onClose: this.onClose,
+    lightboxOpacity: this.state.layoutOpacity
   })
 
   open = () => {

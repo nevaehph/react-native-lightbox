@@ -5,7 +5,7 @@ import { Animated, Dimensions, Modal, PanResponder, Platform, StatusBar, StyleSh
 const WINDOW_HEIGHT = Dimensions.get('window').height;
 const WINDOW_WIDTH = Dimensions.get('window').width;
 const DRAG_DISMISS_THRESHOLD = 150;
-const STATUS_BAR_OFFSET = (Platform.OS === 'android' ? -25 : 0);
+const STATUS_BAR_OFFSET = 0;
 const isIOS = Platform.OS === 'ios';
 
 const styles = StyleSheet.create({
@@ -152,23 +152,32 @@ export default class LightboxOverlay extends Component {
   }
 
   close = () => {
-    this.props.willClose();
-    if(isIOS) {
-      StatusBar.setHidden(false, 'fade');
-    }
-    this.setState({
-      isAnimating: true,
-    });
-    Animated.spring(
-      this.state.openVal,
-      { toValue: 0, ...this.props.springConfig }
-    ).start(() => {
-      this.setState({
-        isAnimating: false,
-      });
-      this.props.onClose();
-    });
-  }
+  	this.props.willClose();
+	if(isIOS) {
+	  StatusBar.setHidden(false, 'fade');
+	}
+	this.setState({
+	  isAnimating: true,
+	});
+	let opacityConfig = {
+	  ...this.props.springConfig,
+	  easing: Easing.in(Easing.ease)
+	};
+	Animated.parallel([
+	  Animated.spring(
+	    this.state.openVal,
+	    { toValue: 0, ...this.props.springConfig }
+	  ),
+	  Animated.timing(
+	    this.props.lightboxOpacity,
+	    { toValue: 1, ...this.props.opacityConfig }
+	  ),
+	]).start(() => {
+	  this.setState({
+	    isAnimating: false,
+	  });
+	  this.props.onClose();
+	});
 
   componentWillReceiveProps(props) {
     if(this.props.isOpen != props.isOpen && props.isOpen) {
